@@ -115,4 +115,4 @@ def contar_monedas_con_referencia(ruta_imagen):
 
 # --- Ejecución ---
 if __name__ == "__main__":
-    contar_monedas_con_referencia('test-img/30.png')
+    contar_monedas_con_referencia('test-img/18.png')
