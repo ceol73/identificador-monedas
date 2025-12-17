@@ -11,11 +11,9 @@ def contar_monedas_con_referencia(ruta_imagen):
     gris = cv2.cvtColor(imagen_original, cv2.COLOR_BGR2GRAY)
 
     # 2. Binarización
-    # Convertimos a binario excluyendo el fondo (valores > 100 son objetos)
     _, binaria = cv2.threshold(gris, 100, 255, cv2.THRESH_BINARY)
 
     # 3. Operaciones Morfológicas (Dilatación y Erosión)
-    # Esto rellena los hoyos y asegura que el área detectada sea sólida
     kernel = np.ones((5, 5), np.uint8)
     dilatada = cv2.dilate(binaria, kernel, iterations=2)
     erosionada = cv2.erode(dilatada, kernel, iterations=1)
@@ -23,8 +21,6 @@ def contar_monedas_con_referencia(ruta_imagen):
     # 4. Encontrar contornos
     contornos, _ = cv2.findContours(erosionada, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    # Filtramos contornos muy pequeños (ruido) que no sean monedas ni referencias
-    # Ajusta 'area_minima' si detectas puntos basura
     area_minima = 500 
     contornos_validos = [c for c in contornos if cv2.contourArea(c) > area_minima]
 
@@ -74,8 +70,8 @@ def contar_monedas_con_referencia(ruta_imagen):
     # Iteramos sobre los contornos validos y sus etiquetas dadas por K-Means
     # zip une la lista de contornos con la lista de etiquetas que generó k-means
     for i, contorno in enumerate(contornos_validos):
-        label_k_means = etiquetas[i][0] # Índice del grupo (0, 1, 2 o 3 sin orden específico)
-        area_centro = centros[label_k_means][0] # El área promedio de ese grupo
+        label_k_means = etiquetas[i][0]                 # Índice del grupo (0, 1, 2 o 3 sin orden específico)
+        area_centro = centros[label_k_means][0]         # El área promedio de ese grupo
         
         # Buscamos qué valor de moneda corresponde a esta área
         valor = mapa_valores[area_centro]
@@ -93,14 +89,11 @@ def contar_monedas_con_referencia(ruta_imagen):
                         cv2.FONT_HERSHEY_SIMPLEX, 0.6, (255, 255, 255), 2)
 
     # 7. Ajuste final: Restar las referencias
-    # Como el usuario dijo que "siempre están" los círculos de control,
-    # y son del mismo tamaño, el algoritmo los contó como monedas.
-    # Restamos 1 a cada categoría.
     
     total_dinero = 0
     print("\n--- Resultado del Conteo (Excluyendo referencias) ---")
     for valor in [10, 5, 2, 1]:
-        cantidad_real = max(0, conteo[valor] - 1) # Restamos la referencia, mínimo 0
+        cantidad_real = max(0, conteo[valor] - 1)
         dinero = cantidad_real * valor
         total_dinero += dinero
         print(f"Monedas de ${valor}: {cantidad_real} detectadas (Total detectado {conteo[valor]} - 1 ref)")
@@ -115,4 +108,4 @@ def contar_monedas_con_referencia(ruta_imagen):
 
 # --- Ejecución ---
 if __name__ == "__main__":
-    contar_monedas_con_referencia('test-img/18.png')
+    contar_monedas_con_referencia('test-img/19.png')
